@@ -195,3 +195,28 @@ SELECT 'Juegos en Bibliotecas', COUNT(*) FROM biblioteca
 UNION ALL
 SELECT 'Logros Desbloqueados', COUNT(*) FROM logros_usuarios;
 
+SELECT 
+    t.transaccion_id, 
+    u.nombre_usuario, 
+    j.titulo AS juego_comprado, 
+    t.monto_total, 
+    mp.proveedor AS metodo_usado, 
+    t.fecha_transaccion
+FROM transacciones t
+JOIN usuarios u ON t.usuario_id = u.usuario_id
+JOIN metodos_pago mp ON t.metodo_pago_id = mp.metodo_pago_id
+JOIN juegos j ON j.juego_id = (SELECT b.juego_id FROM biblioteca b WHERE b.usuario_id = u.usuario_id LIMIT 1)
+LIMIT 10;
+
+
+SELECT 
+    c.nombre AS categoria, 
+    COUNT(t.transaccion_id) AS total_ventas,
+    SUM(t.monto_total) AS recaudacion
+FROM categorias c
+JOIN juegos_categorias jc ON c.categoria_id = jc.categoria_id
+JOIN juegos j ON jc.juego_id = j.juego_id
+JOIN transacciones t ON j.juego_id = j.juego_id -- Relación lógica
+GROUP BY c.nombre
+ORDER BY recaudacion DESC;
+
